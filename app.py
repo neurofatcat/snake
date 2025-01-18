@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 import time
 import random
+from streamlit_autorefresh import st_autorefresh
 
 # --- Game Constants ---
 GRID_SIZE = 20
@@ -50,7 +51,12 @@ def move_snake():
 
     head_x, head_y = st.session_state.snake[0]
     dir_x, dir_y = st.session_state.direction
-    new_head = ((head_x + dir_x) % GRID_WIDTH, (head_y + dir_y) % GRID_HEIGHT)
+    new_head = ((head_x + dir_x), (head_y + dir_y))
+
+    # Check for boundary collision
+    if new_head[0] < 0 or new_head[0] >= GRID_WIDTH or new_head[1] < 0 or new_head[1] >= GRID_HEIGHT:
+        st.session_state.game_over = True
+        return
 
     # Check for collision with self
     if new_head in st.session_state.snake:
@@ -118,71 +124,4 @@ def render_game():
     # Draw snake
     for segment in st.session_state.snake:
         x, y = segment
-        draw.rectangle([x * GRID_SIZE, y * GRID_SIZE, (x +1)*GRID_SIZE, (y +1)*GRID_SIZE], fill=COLOR_SNAKE)
-
-    # Draw food
-    fx, fy = st.session_state.food
-    draw.rectangle([fx * GRID_SIZE, fy * GRID_SIZE, (fx +1)*GRID_SIZE, (fy +1)*GRID_SIZE], fill=COLOR_FOOD)
-
-    # Draw power-up
-    if st.session_state.powerup:
-        px, py = st.session_state.powerup['position']
-        draw.rectangle([px * GRID_SIZE, py * GRID_SIZE, (px +1)*GRID_SIZE, (py +1)*GRID_SIZE], fill=COLOR_POWERUP)
-
-    return img
-
-def reset_game():
-    """Reset the game to initial state."""
-    st.session_state.snake = [(GRID_WIDTH // 2, GRID_HEIGHT // 2)]
-    st.session_state.direction = random.choice([UP, DOWN, LEFT, RIGHT])
-    st.session_state.food = generate_food()
-    st.session_state.powerup = None
-    st.session_state.powerup_timer = 0
-    st.session_state.score = 0
-    st.session_state.game_over = False
-
-# --- Streamlit App Layout ---
-st.title("🐍 Snake Game with Power-ups 🐍")
-
-# Display Score
-st.write(f"**Score:** {st.session_state.score}")
-
-# Display Game Over
-if st.session_state.game_over:
-    st.error("Game Over! Press Reset to play again.")
-
-# Render and display the game
-img = render_game()
-st.image(img)
-
-# Control Buttons
-col1, col2, col3 = st.columns(3)
-with col2:
-    up_button = st.button("⬆️ Up")
-with col1:
-    left_button = st.button("⬅️ Left")
-with col3:
-    right_button = st.button("➡️ Right")
-with col2:
-    down_button = st.button("⬇️ Down")
-
-# Reset Button
-st.sidebar.button("🔄 Reset Game", on_click=reset_game)
-
-# Handle Button Presses
-if up_button:
-    change_direction(UP)
-if down_button:
-    change_direction(DOWN)
-if left_button:
-    change_direction(LEFT)
-if right_button:
-    change_direction(RIGHT)
-
-# Game Loop using Rerun
-if not st.session_state.game_over:
-    move_snake()
-    # Use st.rerun() to refresh the app
-    st.rerun()
-else:
-    pass
+        draw.r
