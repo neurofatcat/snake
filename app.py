@@ -179,10 +179,10 @@ if left_button:
 if right_button:
     change_direction(RIGHT)
 
-# Game Loop using Autorefresh
+# Game Loop using Rerun
 if not st.session_state.game_over:
     move_snake()
-    # Refresh every 200 ms
-    st.experimental_rerun()
+    # Use st.rerun() to refresh the app
+    st.rerun()
 else:
     pass
